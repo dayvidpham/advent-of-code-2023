@@ -13,14 +13,15 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
         pkgs = nixpkgs.legacyPackages.${system}.extend rust-overlay.overlays.default;
+        buildInputs = with pkgs; [
+            gcc 
+            ghc
+            go
+            rust-bin.stable.latest.default
+        ];
     in {
         devShells.default = pkgs.mkShell {
-            packages = with pkgs; [ 
-                gcc
-                ghc
-                go
-                rust-bin.stable.latest.default
-            ];
+            inherit buildInputs;
         };
     });
 }
