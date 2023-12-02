@@ -12,7 +12,7 @@
     outputs = inputs@{ self, nixpkgs, flake-utils, rust-overlay, ... }: 
     flake-utils.lib.eachDefaultSystem (system:
     let
-        pkgs = nixpkgs.legacyPackages.${system}.extend rust-overlay.overlays.default;
+        pkgs = ((nixpkgs.legacyPackages.${system}.extend) rust-overlay.overlays.default);
         buildInputs = with pkgs; [
             gcc 
             ghc
