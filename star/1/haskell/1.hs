@@ -38,11 +38,9 @@ lineToCalibration :: String -> IO Integer
 lineToCalibration str =
     let 
         xs = lineToIntList str
-        (n, x, y) = (length xs, head xs, last xs)
+        (x, y) = (head xs, last xs)
     in 
-        if  n < 2 
-            then return (x*2)
-            else return (x*10 + y)
+        return (x*10 + y)
 
 printAllLines :: Integer -> Handle -> IO (Integer, Handle)
 printAllLines accum handle = do { 
