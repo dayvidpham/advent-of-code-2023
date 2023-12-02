@@ -15,7 +15,7 @@
         pkgs = nixpkgs.legacyPackages.${system}.extend rust-overlay.overlays.default;
     in {
         devShells.default = pkgs.mkShell {
-            buildInputs = with pkgs; [ 
+            packages = with pkgs; [ 
                 gcc
                 ghc
                 go
