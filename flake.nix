@@ -23,5 +23,14 @@
         devShells.default = pkgs.mkShell {
             inherit buildInputs;
         };
+        packages.default = pkgs.stdenv.mkDerivation {
+            name = "advent-of-code-2023";
+            verison = "0.0.1";
+            src = ./.;
+            inherit buildInputs;
+            buildCommand = ''
+                touch $out
+            '';
+        };
     });
 }
