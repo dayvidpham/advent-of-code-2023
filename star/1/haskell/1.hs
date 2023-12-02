@@ -1,28 +1,30 @@
 import System.IO 
-import Control.Monad
+import Data.Typeable
 
-printAllLines :: Handle -> IO Handle
-printAllLines handle = do
-    done <- hIsEOF handle
+-- List experiments
+
+explode :: String -> (IO (), String)
+explode str =
+    case str of
+        "" -> (putStrLn "", "")
+        otherwise -> (putStrLn str >> io, str)
+        where (io, rec) = explode (tail str)
+
+numberFromLine :: String -> Integer -> Integer -> Integer
+numberFromLine str first last = last
+
+printAllLines :: Integer -> Handle -> IO (Integer, Handle)
+printAllLines accum handle = do { 
+    done <- hIsEOF handle; 
     if done == True 
-        then return handle 
-        else do
-            lines <- hGetLine handle 
-            putStrLn lines
-            printAllLines handle
-    -- if done 
-    --     then handle
-    --     else
-    --         putStrLn line
-    --         printAllLines handle;
+    then 
+        return (accum, handle);
+    else do 
+        line <- hGetLine handle;
+        fst (explode line);
+        printAllLines accum handle;
+}
 
--- main = do
---     let filePath = "../1-input.txt";
---     withFile filePath ReadMode (\handle -> do
---         line <- hGetLine handle
---         putStrLn line)
-    
-main :: IO Handle
+main :: IO (Integer, Handle)
 main = do
-    let filePath = "../1-input.txt";
-    withFile filePath ReadMode printAllLines
+    withFile "../1-input.txt" ReadMode (\handle -> printAllLines 0 handle);
