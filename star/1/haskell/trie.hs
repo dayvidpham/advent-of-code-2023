@@ -9,7 +9,7 @@ getWord str root
     | null str = 
         let end = filter ((== '\n') . fst) items
         in case end of
-            ((_, x):_)       -> (True, Just x)
+            ((_, x):_)  -> (True, Just x)
             otherwise   -> (False, Nothing)
     | otherwise = case matches of
         []        -> (False, Nothing)
