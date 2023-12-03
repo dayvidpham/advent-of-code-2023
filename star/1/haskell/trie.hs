@@ -10,11 +10,7 @@ addWord str root
         TrieNode $ (key, addWord suffix (TrieNode [])) : (dict root) 
     | otherwise =
         let
-            (sx, post) = break ((key ==) . fst) (dict root)
-            (x, xs) = if length post > 1
-                then (head post, tail post)
-                else (head post, [])
-
+            (sx, (x:xs)) = break ((key ==) . fst) (dict root)
             rec = addWord suffix (snd x)
             y = (key, rec)
         in TrieNode $ concat [sx, [y], xs]
