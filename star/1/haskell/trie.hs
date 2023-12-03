@@ -4,37 +4,66 @@ data TrieNode =
     deriving (Eq, Show)
 
 
-getWord :: String -> TrieNode -> Bool
+getWord :: String -> TrieNode -> (Bool, Maybe TrieNode)
 getWord str root
-    | null str = -- check keys for '\n'
-        elem '\n' (fst . unzip $ items)
+    | null str = 
+        let end = filter ((== '\n') . fst) items
+        in case end of
+            ((_, x):_)       -> (True, Just x)
+            otherwise   -> (False, Nothing)
     | otherwise = case matches of
-        []        -> False
+        []        -> (False, Nothing)
         (match:_) -> getWord suffix (snd match)
     where
         (key:suffix) = str
         items = dict root
         matches = dropWhile ((/= key) . fst) items
 
-addWord' :: String -> TrieNode -> TrieNode
-addWord' str root
-    | null str = 
+strToInt :: String -> Integer
+strToInt x = case x of
+    "0"     -> 0
+    "1"     -> 1
+    "one"   -> 1
+    "2"     -> 2
+    "two"   -> 2
+    "3"     -> 3
+    "three" -> 3
+    "4"     -> 4
+    "four"  -> 4
+    "5"     -> 5
+    "five"  -> 5
+    "6"     -> 6
+    "six"   -> 6
+    "7"     -> 7
+    "seven" -> 7
+    "8"     -> 8
+    "eight" -> 8
+    "9"     -> 9
+    "nine"  -> 9
+    _ -> -1
+
+addWord' :: String -> String -> TrieNode -> TrieNode
+addWord' str og root
+    | null str = -- maybe redundant with new case below
         root
+    | key == '\n' =
+        TrieNode $ (key, TrieEnd (strToInt og, og)) : items
     | null found =
-        TrieNode $ (key, addWord' suffix (TrieNode [])) : (dict root) 
+        TrieNode $ (key, addWord' suffix og (TrieNode [])) : items
     | otherwise =
         let
-            (sx, (x:xs)) = break ((key ==) . fst) (dict root)
-            rec = addWord' suffix (snd x)
+            (sx, (x:xs)) = break ((key ==) . fst) items
+            rec = addWord' suffix og (snd x)
             y = (key, rec)
         in TrieNode $ concat [sx, [y], xs]
     where
         (key : suffix) = str
-        found = filter (\item -> (fst item) == key) (dict root)
+        items = dict root
+        found = filter (\item -> (fst item) == key) items
 
 
 addWord :: String -> TrieNode -> TrieNode
-addWord str root = addWord' (str ++ "\n") root
+addWord str root = addWord' (str ++ "\n") str root
 
 
 data Node k = Node {
@@ -57,7 +86,7 @@ main =
             "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" ]
         root = foldr (\str -> \trie -> addWord str trie) (TrieNode []) vocab
     in do
-        -- putStrLn $ show root
+        putStrLn $ show root
         putStrLn $ show $ getWord "one" root
         putStrLn $ show $ getWord "onus" root
         putStrLn $ show $ getWord "1" root
