@@ -1,6 +1,20 @@
 data TrieNode = TrieNode {
     dict :: [(Char, TrieNode)]
 } deriving (Eq, Show)
+
+
+getWord :: String -> TrieNode -> Bool
+getWord str root
+    | null str = -- check keys for '\n'
+        elem '\n' (fst $ unzip $ items)
+    | otherwise = case matches of
+        []        -> False
+        (match:_) -> getWord suffix (snd match)
+    where
+        (key:suffix) = str
+        items = dict root
+        matches = dropWhile ((/= key) . fst) items
+
 addWord' :: String -> TrieNode -> TrieNode
 addWord' str root
     | null str = 
