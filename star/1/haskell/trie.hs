@@ -1,12 +1,13 @@
-data TrieNode = TrieNode {
-    dict :: [(Char, TrieNode)]
-} deriving (Eq, Show)
+data TrieNode = 
+    TrieNode { dict :: [(Char, TrieNode)] } 
+    | TrieEnd (Integer, String)
+    deriving (Eq, Show)
 
 
 getWord :: String -> TrieNode -> Bool
 getWord str root
     | null str = -- check keys for '\n'
-        elem '\n' (fst $ unzip $ items)
+        elem '\n' (fst . unzip $ items)
     | otherwise = case matches of
         []        -> False
         (match:_) -> getWord suffix (snd match)
