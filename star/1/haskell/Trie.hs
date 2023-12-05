@@ -8,6 +8,8 @@ import Data.Maybe
 -- Linked List implementation:
 --   * Learning experience
 --   * Was a good prep for the Trie
+
+{-
 data Node k = Node {
     val :: k,
     nxt :: Node k
@@ -18,13 +20,14 @@ nest str = case str of
     []          -> ('\n', ListEnd)
     [x]         -> (x, Node '\n' ListEnd)
     (x:x2:xs)   -> (x, Node x2 $ snd $ nest (x2:xs))
+-}
 
 
 ---------------------------------------------------
 -- Trie implementation
 data TrieNode = 
     TrieNode { dict :: [(Char, TrieNode)] } 
-    | TrieEnd { valLen :: (Integer, Integer) }
+    | TrieEnd { val :: Integer }
     deriving (Eq, Show)
 
 
@@ -53,29 +56,28 @@ getWord str root
         matches = dropWhile ((/= key) . fst) items
 
 
-strToInt :: String -> (Integer, Integer)
+strToInt :: String -> Integer
 strToInt x = case x of
-    "0"     -> (0, n)
-    "1"     -> (1, n)
-    "one"   -> (1, n)
-    "2"     -> (2, n)
-    "two"   -> (2, n)
-    "3"     -> (3, n)
-    "three" -> (3, n)
-    "4"     -> (4, n)
-    "four"  -> (4, n)
-    "5"     -> (5, n)
-    "five"  -> (5, n)
-    "6"     -> (6, n)
-    "six"   -> (6, n)
-    "7"     -> (7, n)
-    "seven" -> (7, n)
-    "8"     -> (8, n)
-    "eight" -> (8, n)
-    "9"     -> (9, n)
-    "nine"  -> (9, n)
-    _       -> (-1, -1)
-    where n = toInteger . length $ x
+    "0"     -> 0
+    "1"     -> 1
+    "one"   -> 1
+    "2"     -> 2
+    "two"   -> 2
+    "3"     -> 3
+    "three" -> 3
+    "4"     -> 4
+    "four"  -> 4
+    "5"     -> 5
+    "five"  -> 5
+    "6"     -> 6
+    "six"   -> 6
+    "7"     -> 7
+    "seven" -> 7
+    "8"     -> 8
+    "eight" -> 8
+    "9"     -> 9
+    "nine"  -> 9
+    _       -> -1
 
 
 addWord' :: String -> String -> TrieNode -> TrieNode
@@ -83,7 +85,7 @@ addWord' str og root
     | null str = -- maybe redundant with new case below
         root
     | key == '\n' =
-        TrieNode $ (key, TrieEnd . strToInt $ og) : items
+        TrieNode $ (key, TrieEnd $ strToInt og) : items
     | null found =
         TrieNode $ (key, addWord' suffix og (TrieNode [])) : items
     | otherwise =
@@ -104,29 +106,28 @@ addWord str root = addWord' (str ++ "\n") str root
 
 ---------------------------------------------------
 -- Start of actual problem solving code
-feedStrTrie :: String -> TrieNode -> (Integer, String)
+feedStrTrie :: String -> TrieNode -> Integer
 feedStrTrie [] root = case end of
-    Nothing -> (-1, "")
-    Just a  -> (fst . valLen $ a, "") -- only path where TrieEnd can be returned
+    Nothing -> -1
+    Just leaf  -> val leaf -- only path where TrieEnd can be returned
     where end = fstItemMatch '\n' root
 
 feedStrTrie str@(x:xs) root = case end of
-    Just value  -> (fst . valLen $ value, str) 
+    Just leaf  -> val leaf
     Nothing     -> case next of
-        Nothing   -> (-1, "continue") -- no match: hit max depth on this path
+        Nothing   -> -1 -- no match: hit max depth on this path
         Just node -> feedStrTrie xs node
-    -- use (-1, suffix) as return on not found but still more input
     where end  = fstItemMatch '\n' root
           next = fstItemMatch x root
 
 
 lineToIntList :: String -> TrieNode -> [Integer] -> [Integer]
 lineToIntList str root xs | null str  = reverse xs
-                          | otherwise = case conv of
+                          | otherwise = case matchResult of
                               -1  -> lineToIntList cs root xs 
-                              _   -> lineToIntList cs root ([conv] ++ xs)
-                              where (conv, suffix) = feedStrTrie str root
-                                    (_:cs)         = str
+                              _   -> lineToIntList cs root ([matchResult] ++ xs)
+                              where matchResult = feedStrTrie str root
+                                    (_:cs)      = str
 
 
 lineToCalibration :: String -> TrieNode -> Integer
