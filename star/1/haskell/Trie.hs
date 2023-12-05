@@ -1,3 +1,5 @@
+module Trie where
+
 import System.IO
 import Data.Maybe
 
@@ -143,16 +145,12 @@ printAllLines accum root handle = do {
     done <- hIsEOF handle; 
     if done == True 
     then 
-        --return (accum, handle);
         return ();
     else do {
         line <- hGetLine handle;
         xs <- return (reverse $ lineToIntList line root []);
         putStrLn . concat $ [(show xs), " ", line];
         printAllLines (accum) root handle;
-        --num <- lineToCalibration line;
-        --putStrLn (show (accum+num));
-        --printAllLines (accum+num) handle;
     }
 }
 
