@@ -1,5 +1,3 @@
-module Trie where
-
 import System.IO
 import Data.Maybe
 
@@ -167,5 +165,4 @@ main =
         (calibration, path) <- withFile "../1-input.txt" ReadMode (printAllLines 0 root)
         putStrLn $ show calibration
         putStrLn $ show path
-
 
