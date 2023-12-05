@@ -111,17 +111,17 @@ feedStrTrie [] root = case end of
 feedStrTrie str@(x:xs) root = case end of
     Just value  -> (fst . valLen $ value, str) 
     Nothing     -> case next of
-        Nothing   -> feedStrTrie xs root
+        Nothing   -> (-1, xs) -- no match: hit max depth on this path
         Just node -> feedStrTrie xs node
+    -- use (-1, suffix) as return on not found but still more input
     where end  = fstItemMatch '\n' root
           next = fstItemMatch x root
 
 
 lineToIntList :: String -> TrieNode -> [Integer] -> [Integer]
 lineToIntList str root xs = case conv of
-    -- | conv /= -1 = lineToIntList suffix root (xs ++ [conv])
-    -- | otherwise  = lineToIntList suffix root xs
-    -1 -> lineToIntList suffix root xs 
+    -1  | null str  -> xs
+        | otherwise -> lineToIntList suffix root xs 
     _  -> lineToIntList suffix root ([conv] ++ xs)
     where (conv, suffix) = feedStrTrie str root
 
@@ -147,8 +147,8 @@ printAllLines accum root handle = do {
         return ();
     else do {
         line <- hGetLine handle;
-        x <- return (feedStrTrie line root);
-        putStrLn . show $ x;
+        xs <- return (reverse $ lineToIntList line root []);
+        putStrLn . concat $ [(show xs), " ", line];
         printAllLines (accum) root handle;
         --num <- lineToCalibration line;
         --putStrLn (show (accum+num));
@@ -166,7 +166,7 @@ main =
             "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" ]
         root = foldr (\str -> \trie -> addWord str trie) (TrieNode []) vocab
     in do
-        withFile "../1-input.txt" ReadMode (\handle -> printAllLines 0 root handle)
         putStrLn . show $ root
+        withFile "../1-input.txt" ReadMode (\handle -> printAllLines 0 root handle)
 
 
