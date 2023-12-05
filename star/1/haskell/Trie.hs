@@ -129,35 +129,31 @@ lineToIntList str root xs | null str  = reverse xs
                                     (_:cs)         = str
 
 
-{-
-lineToCalibration :: String -> IO Integer
-lineToCalibration str =
+lineToCalibration :: String -> TrieNode -> Integer
+lineToCalibration str root =
     let 
-        xs = lineToIntList str
+        xs = lineToIntList str root []
         (x, y) = (head xs, last xs)
     in 
-        return (x*10 + y)
--}
+        x*10 + y
 
---hFeedStrTrie :: IO String 
 
---printAllLines :: Integer -> Handle -> IO (Integer, Handle)
-printAllLines :: Integer -> TrieNode -> Handle -> IO ()
+printAllLines :: Integer -> TrieNode -> Handle -> IO (Integer, Handle)
 printAllLines accum root handle = do { 
     done <- hIsEOF handle; 
     if done == True 
     then 
-        return ();
+        return (accum, handle);
     else do {
         line <- hGetLine handle;
         xs <- return (lineToIntList line root []);
-        putStrLn . concat $ [(show xs), " ", line];
-        printAllLines (accum) root handle;
+        x <- return (lineToCalibration line root);
+        putStrLn . concat $ [show x, " ", show xs, " ", line];
+        printAllLines (accum+x) root handle;
     }
 }
 
 
---main :: IO (Integer, Handle)
 main :: IO ()
 main =
     let
@@ -166,7 +162,9 @@ main =
             "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" ]
         root = foldr (\str -> \trie -> addWord str trie) (TrieNode []) vocab
     in do
-        putStrLn . show $ root
-        withFile "../1-input.txt" ReadMode (\handle -> printAllLines 0 root handle)
+        --putStrLn . show $ root
+        (calibration, path) <- withFile "../1-input.txt" ReadMode (printAllLines 0 root)
+        putStrLn $ show calibration
+        putStrLn $ show path
 
 
