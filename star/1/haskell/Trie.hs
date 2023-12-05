@@ -113,7 +113,7 @@ feedStrTrie [] root = case end of
 feedStrTrie str@(x:xs) root = case end of
     Just value  -> (fst . valLen $ value, str) 
     Nothing     -> case next of
-        Nothing   -> (-1, xs) -- no match: hit max depth on this path
+        Nothing   -> (-1, "continue") -- no match: hit max depth on this path
         Just node -> feedStrTrie xs node
     -- use (-1, suffix) as return on not found but still more input
     where end  = fstItemMatch '\n' root
@@ -121,11 +121,13 @@ feedStrTrie str@(x:xs) root = case end of
 
 
 lineToIntList :: String -> TrieNode -> [Integer] -> [Integer]
-lineToIntList str root xs = case conv of
-    -1  | null str  -> xs
-        | otherwise -> lineToIntList suffix root xs 
-    _  -> lineToIntList suffix root ([conv] ++ xs)
-    where (conv, suffix) = feedStrTrie str root
+lineToIntList str root xs | null str  = reverse xs
+                          | otherwise = case conv of
+                              -1  -> lineToIntList cs root xs 
+                              _   -> lineToIntList suffix root ([conv] ++ xs)
+                              where (conv, suffix) = feedStrTrie str root
+                                    (_:cs)         = str
+
 
 {-
 lineToCalibration :: String -> IO Integer
@@ -148,7 +150,7 @@ printAllLines accum root handle = do {
         return ();
     else do {
         line <- hGetLine handle;
-        xs <- return (reverse $ lineToIntList line root []);
+        xs <- return (lineToIntList line root []);
         putStrLn . concat $ [(show xs), " ", line];
         printAllLines (accum) root handle;
     }
