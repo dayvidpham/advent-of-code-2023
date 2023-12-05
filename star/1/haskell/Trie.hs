@@ -124,7 +124,7 @@ lineToIntList :: String -> TrieNode -> [Integer] -> [Integer]
 lineToIntList str root xs | null str  = reverse xs
                           | otherwise = case conv of
                               -1  -> lineToIntList cs root xs 
-                              _   -> lineToIntList suffix root ([conv] ++ xs)
+                              _   -> lineToIntList cs root ([conv] ++ xs)
                               where (conv, suffix) = feedStrTrie str root
                                     (_:cs)         = str
 
