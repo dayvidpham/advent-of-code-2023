@@ -1,8 +1,9 @@
-module Main where
+module CubeGame where
 
 import System.IO
 
-
+splitStr :: String -> String -> [String]
+splitStr str sep = [str]
 
 printAllLines :: Handle -> IO ()
 printAllLines fp = do 
@@ -10,7 +11,7 @@ printAllLines fp = do
     case isEOF of   True  -> return ()
                     False -> do
                         ln <- hGetLine fp
-                        putStrLn ln
+                        putStrLn . show $ splitStr ln ""
                         printAllLines fp
 
 main :: IO ()
