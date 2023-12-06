@@ -24,3 +24,6 @@ cabal.project.local~
 
 # vim swp files
 *.swp
+
+# direnv outputs
+.direnv/
