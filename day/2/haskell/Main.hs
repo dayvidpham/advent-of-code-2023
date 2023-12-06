@@ -2,6 +2,8 @@ module Main where
 
 import System.IO
 
+
+
 printAllLines :: Handle -> IO ()
 printAllLines fp = do 
     isEOF <- hIsEOF fp
@@ -16,7 +18,5 @@ main =
     let
         inputPath = "../2-input.txt";
     in do
-        --putStrLn . show $ root
-        out <- withFile "../2-input.txt" ReadMode printAllLines
-        return ()
+        withFile "../2-input.txt" ReadMode printAllLines
 
