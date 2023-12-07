@@ -1,3 +1,5 @@
+module CubeGame2 where
+
 import System.IO
 
 data Dict k v = Dict {
