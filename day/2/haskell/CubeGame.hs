@@ -45,23 +45,26 @@ partitionByKeys keys items = foldl partition [] keys
     where filterItems key   = filter ((== key) . fst) items
           partition acc key = acc ++ [(key, map (snd) $ filterItems key)]
 
-printAllLines :: Integer -> Dict String Integer -> Handle -> IO ()
+printAllLines :: Integer -> Dict String Integer -> Handle -> IO Integer
 printAllLines acc maxs fp = do 
     isEOF <- hIsEOF fp
     case isEOF of   
-        True  -> return ()
+        True  -> return acc
         False -> do
             ln <- hGetLine fp
             let splits              = splitStr ln ",;:"
             let (idList:colourList) = map words splits
-            let (idK:idV:_)         = idList 
-            let id                  = (idK, read idV :: Integer)
+            --let (idK:idVStr:_)      = idList 
+            let (_:idVStr:_)          = idList 
+            let idV                 = read idVStr :: Integer
+            --let idItem              = (idK, idV)
             let colourItems         = map revListToItem colourList
             let dict                = Dict $ partitionByKeys clrs colourItems
-            let clrToReality        = fmap (\clr -> (clrInBounds clr dict maxs)) clrs
-            putStrLn . show $ dict
-            putStrLn . show $ reality
-            printAllLines acc maxs fp
+            let clrToReality        = fmap (\clr -> clrInBounds clr dict maxs) clrs
+            let reality             = all id clrToReality
+            case reality of
+                False -> printAllLines acc maxs fp
+                True -> printAllLines (acc+idV) maxs fp
             where clrs = ["red", "green", "blue"]
                   revListToItem vk  = let (v:k:_) = vk in (k, read v :: Integer)
                   clrInBounds clr ddict dmaxs = case (mMaxN, mns) of
@@ -72,7 +75,7 @@ printAllLines acc maxs fp = do
                     where mMaxN = dGet clr dmaxs
                           mns   = dGet clr ddict
 
-main :: IO ()
+main :: IO Integer
 main =
     let
         inputPath = "../2-input.txt";
