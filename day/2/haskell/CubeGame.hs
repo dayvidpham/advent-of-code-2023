@@ -56,14 +56,21 @@ printAllLines acc maxs fp = do
             let (idList:colourList) = map words splits
             let (idK:idV:_)         = idList 
             let id                  = (idK, read idV :: Integer)
-            let colourItems        = map (\vk -> let (v:k:_) = vk in (k, read v :: Integer)) colourList
-            let select              = partitionByKeys clrs colourItems
-            --let items               = concat [[id], colours]
-            --putStrLn . show $ items
-            
-            putStrLn . show $ select
+            let colourItems         = map revListToItem colourList
+            let dict                = Dict $ partitionByKeys clrs colourItems
+            let clrToReality        = fmap (\clr -> (clrInBounds clr dict maxs)) clrs
+            putStrLn . show $ dict
+            putStrLn . show $ reality
             printAllLines acc maxs fp
             where clrs = ["red", "green", "blue"]
+                  revListToItem vk  = let (v:k:_) = vk in (k, read v :: Integer)
+                  clrInBounds clr ddict dmaxs = case (mMaxN, mns) of
+                    (Nothing, Nothing)      -> True
+                    (Nothing, _)            -> False
+                    (_, Nothing)            -> True
+                    (Just maxN, Just ns)    -> and $ fmap (maxN >=) ns
+                    where mMaxN = dGet clr dmaxs
+                          mns   = dGet clr ddict
 
 main :: IO ()
 main =
