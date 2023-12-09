@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+src_in=$1
+out=${src_in%.hs}
+ghc -no-keep-hi-files -no-keep-o-files ${src_in} -o ${out} && ./${out}
