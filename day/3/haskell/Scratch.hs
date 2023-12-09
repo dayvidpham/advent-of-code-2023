@@ -67,6 +67,7 @@ printAllLines acc fp = do
                     Nothing -> -1
                     Just ns -> foldl max 0 ns
                     where mns   = dGet clr ddict
+
 ---------------------------------------------------------------------------------------------------------
 
 {-
@@ -76,26 +77,50 @@ lineToDict fPutItem col ln = case dropWhile isDot ln of
     where isDot c = c == '.'
 -}
 
+isNumber :: Char -> Bool
+isNumber c = c `elem` ['0'..'9']
+
+hasSymbol :: String -> Bool
+hasSymbol ln = case dropWhile notSymbol ln of
+    "" -> False
+    _  -> True
+    where notSymbol c = elem c (['0'..'9'] ++ ['.'])
+
+consumeRows :: (String, String, String) -> (String, String, String) -> Integer -> IO ()
+consumeRows ((top:[]), (cur:[]), (btm:[])) (tops, curs, btms)  acm = print acm
+consumeRows  ((top:ntop:topss), (cur:ncur:curss), (btm:nbtm:btmss)) (tops, curs, btms) acm = do
+    print (topss, curss, btmss)
+    consumeRows  (ntop:topss, ncur:curss, nbtm:btmss) ([top]++tops, [cur]++curs, [btm]++btms) acm
+    
+
+--slidingWindow :: (String, String, String) -> (String, String, String)
+--slidingWindow (above, ln, below) = (take 1 above, take 1 ln, take 1 below)
 
 processLines :: String -> [String] -> IO ()
+
 processLines _ (ln:[]) = return ()
+
 processLines above (ln:below:lns) = do
-    putStrLn ln
+    --print $ consumeRows (above, ln, below) ("", "", "") 0
+    consumeRows (above, ln, below) ("", "", "") 0
     processLines ln (below:lns)
 
 padLines :: [String] -> [String]
 padLines []         = []
-padLines lns@(ln:_) = concat [pad, lns, pad]
-    where pad = [replicate (length ln) '.']
+padLines lns@(ln:_) = concat [pad, padBody lns, pad]
+  where pad = [replicate (length ln + 2) '.']
+        padBody (ln:lns) = case (ln, lns) of
+            (ln, [])  -> ["." ++ ln ++ "."]
+            (ln, lns) -> ["." ++ ln ++ "."] ++ (padBody lns)
 
 main :: IO ()
 main =
     let
         inputPath   = "../3-input.txt";
     in do
-        inputText   <- readFile inputPath
-        let inLines = lines inputText
-        let (pad:lns) = padLines inLines
+        inputText       <- readFile inputPath
+        let inLines     = lines inputText
+        let (pad:lns)   = padLines inLines
         --putStrLn . show $ lns
         processLines pad lns
 
