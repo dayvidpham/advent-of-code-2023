@@ -87,10 +87,20 @@ hasSymbol ln = case dropWhile notSymbol ln of
     where notSymbol c = elem c (['0'..'9'] ++ ['.'])
 
 consumeRows :: (String, String, String) -> (String, String, String) -> Integer -> IO ()
-consumeRows ((top:[]), (cur:[]), (btm:[])) (tops, curs, btms)  acm = print acm
-consumeRows  ((top:ntop:topss), (cur:ncur:curss), (btm:nbtm:btmss)) (tops, curs, btms) acm = do
-    print (topss, curss, btmss)
-    consumeRows  (ntop:topss, ncur:curss, nbtm:btmss) ([top]++tops, [cur]++curs, [btm]++btms) acm
+consumeRows 
+  ((top:[]), (cur:[]), (btm:[])) 
+  (tops, curs, btms)
+  acm = 
+    print acm
+
+consumeRows
+  ((top:ntop:topss), (cur:ncur:curss), (btm:nbtm:btmss))
+  (tops, curs, btms)
+  acm = do
+    --print (topss, curss, btmss)
+    consumeRows (ntop:topss, ncur:curss, nbtm:btmss)
+                ([top]++tops, [cur]++curs, [btm]++btms)
+                acm
     
 
 --slidingWindow :: (String, String, String) -> (String, String, String)
