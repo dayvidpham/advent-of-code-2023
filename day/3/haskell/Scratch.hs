@@ -54,10 +54,8 @@ printAllLines acc fp = do
             ln <- hGetLine fp
             let splits              = splitStr ln ",;:"
             let (idList:colourList) = map words splits
-            --let (idK:idVStr:_)      = idList 
-            let (_:idVStr:_)          = idList 
+            let (_:idVStr:_)        = idList 
             let idV                 = read idVStr :: Integer
-            --let idItem              = (idK, idV)
             let colourItems         = map revListToItem colourList
             let dict                = Dict $ partitionByKeys clrs colourItems
             let maxCnts             = fmap (\clr -> clrToMaxCnt clr dict) clrs
@@ -69,11 +67,35 @@ printAllLines acc fp = do
                     Nothing -> -1
                     Just ns -> foldl max 0 ns
                     where mns   = dGet clr ddict
+---------------------------------------------------------------------------------------------------------
 
-main :: IO Integer
+{-
+lineToDict :: (Integer -> Integer -> Char -> Dict) -> Integer -> String -> Dict
+lineToDict fPutItem col ln = case dropWhile isDot ln of
+    ""  -> ,
+    where isDot c = c == '.'
+-}
+
+
+processLines :: String -> [String] -> IO ()
+processLines _ (ln:[]) = return ()
+processLines above (ln:below:lns) = do
+    putStrLn ln
+    processLines ln (below:lns)
+
+padLines :: [String] -> [String]
+padLines []         = []
+padLines lns@(ln:_) = concat [pad, lns, pad]
+    where pad = [replicate (length ln) '.']
+
+main :: IO ()
 main =
     let
-        inputPath = "../2-input.txt";
+        inputPath   = "../3-input.txt";
     in do
-        withFile "../2-input.txt" ReadMode (printAllLines 0)
+        inputText   <- readFile inputPath
+        let inLines = lines inputText
+        let (pad:lns) = padLines inLines
+        --putStrLn . show $ lns
+        processLines pad lns
 
