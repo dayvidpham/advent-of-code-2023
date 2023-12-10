@@ -93,40 +93,31 @@ hasSymbol ln = case dropWhile notSymbol ln of
 mapTuple3 :: (a -> b) -> (a, a, a) -> (b, b, b)
 mapTuple3 f (x, y, z) = (f x, f y, f z)
 
-consumeRows 
+
+lineToParts :: (String, String, String) -> [Integer] -> [Integer] 
+lineToParts 
   (_, "", _) 
   parts = 
-    print parts
+    parts
 
 
-consumeRows
+lineToParts
   (tops, curs, btms)
   parts = do
-    --print checkTops
-    --print (concat [drop dropN toss, numStr, postChar], isPart)
-    --print checkBtms
     case isPart of
-        True -> consumeRows next $ [read numStr :: Integer] ++ parts
-        False -> consumeRows next $ parts
-    --case numStr of
-    --    "" -> case rem of
-    --        "" -> print parts
-    --        _  -> consumeRows next parts
-    --    _ | isPart -> consumeRows next $ [read numStr :: Integer] ++ parts
-    --    _ -> consumeRows next $ parts
-
+        True  -> lineToParts next $ [read numStr :: Integer] ++ parts
+        False -> lineToParts next $ parts
     where (toss, numRaw) = break isNumber curs
           (numStr, rem)  = span isNumber numRaw
 
-          pre = case drop dropN toss of 
-            ""      -> False
-            (x:_)   -> isSymbol x
+          pre = hasSymbol $ drop dropN toss
           post = case rem of
             ""      -> False
             (x:_)   -> isSymbol x
-          postChar = case rem of
-            ""      -> ""
-            (x:_)   -> (x:"")
+          -- For debugging
+          -- postChar = case rem of
+          --   ""      -> ""
+          --   (x:_)   -> (x:"")
 
           dropN = length toss - 1
           takeN = if dropN > 0 then length numStr + 2 else length numStr + 1
@@ -134,16 +125,22 @@ consumeRows
           (checkTops, remTops) = (splitAt takeN . drop dropN) tops
           (checkBtms, remBtms) = (splitAt takeN . drop dropN) btms
           isPart = pre || post || hasSymbol checkTops || hasSymbol checkBtms
-          topss = concat [drop (takeN-1) checkTops, remTops]
-          btmss = concat [drop (takeN-1) checkBtms, remBtms]
-            
+
+          dropNextN = case dropN of
+            0 -> takeN
+            _ -> takeN-1
+          topss = concat [drop dropNextN checkTops, remTops]
+          btmss = concat [drop dropNextN checkBtms, remBtms]
+
           next = (topss, rem, btmss)
 
-processLines :: String -> [String] -> IO ()
-processLines _ (ln:[]) = return ()
-processLines above (ln:below:lns) = do
-    consumeRows (above, ln, below) []
-    processLines ln (below:lns)
+processLines :: String -> [String] -> Integer -> IO ()
+processLines _ (ln:[]) acm = print acm
+processLines above (ln:below:lns) acm = do
+    putStrLn $ (show acm) ++ "\t" ++ (show $ sum parts) ++ "\t" ++ (show parts)
+    processLines ln (below:lns) acmNext
+    where parts = lineToParts (above, ln, below) []
+          acmNext = acm + sum parts
 
 padLines :: [String] -> [String]
 padLines []         = []
@@ -162,5 +159,5 @@ main =
         let inLines     = lines inputText
         let (pad:lns)   = padLines inLines
         --putStrLn . show $ lns
-        processLines pad lns
+        processLines pad lns 0
 
