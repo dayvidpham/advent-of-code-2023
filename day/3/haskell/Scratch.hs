@@ -1,6 +1,7 @@
 module Scratch where
 
 import System.IO
+import Control.Arrow
 
 data Dict k v = Dict {
     dItems :: [(k, v)]
@@ -78,41 +79,52 @@ lineToDict fPutItem col ln = case dropWhile isDot ln of
 -}
 
 isNumber :: Char -> Bool
-isNumber c = c `elem` ['0'..'9']
+isNumber c = c `elem` "0123456789"
+
+isSymbol :: Char -> Bool
+isSymbol c = not $ c `elem` "0123456789."
 
 hasSymbol :: String -> Bool
 hasSymbol ln = case dropWhile notSymbol ln of
     "" -> False
     _  -> True
-    where notSymbol c = elem c (['0'..'9'] ++ ['.'])
+    where notSymbol c = not $ isSymbol c
 
-consumeRows :: (String, String, String) -> (String, String, String) -> Integer -> IO ()
+mapTuple3 :: (a -> b) -> (a, a, a) -> (b, b, b)
+mapTuple3 f (x, y, z) = (f x, f y, f z)
+
+consumeRows :: (String, String, String) -> Bool -> [Integer] -> IO ()
 consumeRows 
   ((top:[]), (cur:[]), (btm:[])) 
-  (tops, curs, btms)
-  acm = 
-    print acm
+  isPart
+  parts = 
+    print parts
 
 consumeRows
-  ((top:ntop:topss), (cur:ncur:curss), (btm:nbtm:btmss))
   (tops, curs, btms)
-  acm = do
-    --print (topss, curss, btmss)
-    consumeRows (ntop:topss, ncur:curss, nbtm:btmss)
-                ([top]++tops, [cur]++curs, [btm]++btms)
-                acm
-    
-
---slidingWindow :: (String, String, String) -> (String, String, String)
---slidingWindow (above, ln, below) = (take 1 above, take 1 ln, take 1 below)
+  isPart
+  parts = do
+    print $ area
+    --case toss of
+    --    "" -> case numStr of
+    --    _  -> consumeRows (ntop:topss, ncur:curss, nbtm:btmss) cs isPart parts
+    where isParsing      = not $ null cs
+          (toss, numRaw) = break isNumber curs
+          (numStr, rem)  = span isNumber numRaw
+          pre = case drop dropN toss of 
+            ""      -> False
+            (x:_)   -> isSymbol x
+          post = case rem of
+            ""      -> False
+            (x:_)   -> isSymbol x
+          dropN = length toss - 1
+          takeN = if dropN > 0 then length numStr + 2 else length numStr + 1
+          area = map (splitAt takeN . drop dropN) [tops, btms]
 
 processLines :: String -> [String] -> IO ()
-
 processLines _ (ln:[]) = return ()
-
 processLines above (ln:below:lns) = do
-    --print $ consumeRows (above, ln, below) ("", "", "") 0
-    consumeRows (above, ln, below) ("", "", "") 0
+    consumeRows (above, ln, below) "" False []
     processLines ln (below:lns)
 
 padLines :: [String] -> [String]
