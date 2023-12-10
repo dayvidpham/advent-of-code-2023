@@ -98,7 +98,7 @@ lineToParts :: (String, String, String) -> [Integer] -> [Integer]
 lineToParts 
   (_, "", _) 
   parts = 
-    parts
+    reverse parts
 
 
 lineToParts
