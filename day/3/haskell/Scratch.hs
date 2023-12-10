@@ -108,8 +108,7 @@ consumeRows
     --case toss of
     --    "" -> case numStr of
     --    _  -> consumeRows (ntop:topss, ncur:curss, nbtm:btmss) cs isPart parts
-    where isParsing      = not $ null cs
-          (toss, numRaw) = break isNumber curs
+    where (toss, numRaw) = break isNumber curs
           (numStr, rem)  = span isNumber numRaw
           pre = case drop dropN toss of 
             ""      -> False
@@ -124,7 +123,7 @@ consumeRows
 processLines :: String -> [String] -> IO ()
 processLines _ (ln:[]) = return ()
 processLines above (ln:below:lns) = do
-    consumeRows (above, ln, below) "" False []
+    consumeRows (above, ln, below) False []
     processLines ln (below:lns)
 
 padLines :: [String] -> [String]
