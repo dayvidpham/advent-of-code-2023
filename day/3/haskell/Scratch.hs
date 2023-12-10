@@ -94,16 +94,40 @@ mapTuple3 :: (a -> b) -> (a, a, a) -> (b, b, b)
 mapTuple3 f (x, y, z) = (f x, f y, f z)
 
 
+{-
 lineToParts :: (String, String, String) -> [Integer] -> [Integer] 
 lineToParts 
   (_, "", _) 
   parts = 
     reverse parts
+-}
+
+lineToParts :: (String, String, String) -> [Integer] -> IO [Integer] 
+lineToParts 
+  (_, "", _) 
+  parts = 
+    return $ reverse parts
 
 
 lineToParts
   (tops, curs, btms)
   parts = do
+    --print "before:"
+    --print tops
+    --print curs
+    --print btms
+    --putStrLn $ concat ["dropN: ", show dropN, " takeN: ", show takeN]
+    --print checkTops
+    --print $ concat [drop dropN toss, numStr, take 1 rem]
+    --print checkBtms
+    --print isPart
+    --putStrLn "==========="
+    --print "after:"
+    --print topss
+    --print rem
+    --print btmss
+    --putStrLn ""
+
     case isPart of
         True  -> lineToParts next $ [read numStr :: Integer] ++ parts
         False -> lineToParts next $ parts
@@ -120,15 +144,13 @@ lineToParts
           --   (x:_)   -> (x:"")
 
           dropN = length toss - 1
-          takeN = if dropN > 0 then length numStr + 2 else length numStr + 1
-
+          --takeN = if dropN > 0 then length numStr + 2 else length numStr + 1
+          takeN = length numStr + 2
           (checkTops, remTops) = (splitAt takeN . drop dropN) tops
           (checkBtms, remBtms) = (splitAt takeN . drop dropN) btms
           isPart = pre || post || hasSymbol checkTops || hasSymbol checkBtms
 
-          dropNextN = case dropN of
-            0 -> takeN
-            _ -> takeN-1
+          dropNextN = takeN-1
           topss = concat [drop dropNextN checkTops, remTops]
           btmss = concat [drop dropNextN checkBtms, remBtms]
 
@@ -137,10 +159,10 @@ lineToParts
 processLines :: String -> [String] -> Integer -> IO ()
 processLines _ (ln:[]) acm = print acm
 processLines above (ln:below:lns) acm = do
+    parts <- lineToParts (above, ln, below) []
+    let acmNext = acm + sum parts
     putStrLn $ (show acm) ++ "\t" ++ (show $ sum parts) ++ "\t" ++ (show parts)
     processLines ln (below:lns) acmNext
-    where parts = lineToParts (above, ln, below) []
-          acmNext = acm + sum parts
 
 padLines :: [String] -> [String]
 padLines []         = []
@@ -160,4 +182,3 @@ main =
         let (pad:lns)   = padLines inLines
         --putStrLn . show $ lns
         processLines pad lns 0
-
