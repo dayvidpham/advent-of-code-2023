@@ -93,37 +93,56 @@ hasSymbol ln = case dropWhile notSymbol ln of
 mapTuple3 :: (a -> b) -> (a, a, a) -> (b, b, b)
 mapTuple3 f (x, y, z) = (f x, f y, f z)
 
-consumeRows :: (String, String, String) -> Bool -> [Integer] -> IO ()
 consumeRows 
-  ((top:[]), (cur:[]), (btm:[])) 
-  isPart
+  (_, "", _) 
   parts = 
     print parts
 
+
 consumeRows
   (tops, curs, btms)
-  isPart
   parts = do
-    print $ area
-    --case toss of
-    --    "" -> case numStr of
-    --    _  -> consumeRows (ntop:topss, ncur:curss, nbtm:btmss) cs isPart parts
+    --print checkTops
+    --print (concat [drop dropN toss, numStr, postChar], isPart)
+    --print checkBtms
+    case isPart of
+        True -> consumeRows next $ [read numStr :: Integer] ++ parts
+        False -> consumeRows next $ parts
+    --case numStr of
+    --    "" -> case rem of
+    --        "" -> print parts
+    --        _  -> consumeRows next parts
+    --    _ | isPart -> consumeRows next $ [read numStr :: Integer] ++ parts
+    --    _ -> consumeRows next $ parts
+
     where (toss, numRaw) = break isNumber curs
           (numStr, rem)  = span isNumber numRaw
+
           pre = case drop dropN toss of 
             ""      -> False
             (x:_)   -> isSymbol x
           post = case rem of
             ""      -> False
             (x:_)   -> isSymbol x
+          postChar = case rem of
+            ""      -> ""
+            (x:_)   -> (x:"")
+
           dropN = length toss - 1
           takeN = if dropN > 0 then length numStr + 2 else length numStr + 1
-          area = map (splitAt takeN . drop dropN) [tops, btms]
+
+          (checkTops, remTops) = (splitAt takeN . drop dropN) tops
+          (checkBtms, remBtms) = (splitAt takeN . drop dropN) btms
+          isPart = pre || post || hasSymbol checkTops || hasSymbol checkBtms
+          topss = concat [drop (takeN-1) checkTops, remTops]
+          btmss = concat [drop (takeN-1) checkBtms, remBtms]
+            
+          next = (topss, rem, btmss)
 
 processLines :: String -> [String] -> IO ()
 processLines _ (ln:[]) = return ()
 processLines above (ln:below:lns) = do
-    consumeRows (above, ln, below) False []
+    consumeRows (above, ln, below) []
     processLines ln (below:lns)
 
 padLines :: [String] -> [String]
