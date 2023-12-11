@@ -160,7 +160,11 @@ lineToParts
 processLines :: String -> [String] -> Int -> Int-> Dict (Int, Int) [Int] -> IO ()
 processLines _ (ln:[]) row acm dict = do 
     print acm
-    print dict
+    print total
+    where gearItems = filter (\ itm -> (length . snd $ itm) == 2) $ dItems dict
+          total = sum $ map (product . snd) gearItems
+          --gearRatios = map product gears
+
 processLines above (ln:below:lns) row acm dict = do
     (parts, nextDict) <- lineToParts (above, ln, below) (row, 0) [] dict
     let acmNext = acm + sum parts
