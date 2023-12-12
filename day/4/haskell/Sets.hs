@@ -1,4 +1,4 @@
-module Brute where
+module Sets where
 
 import System.IO
 import Data.Set (Set)

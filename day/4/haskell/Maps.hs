@@ -1,8 +1,11 @@
-module Brute where
+module Maps where
 
 import System.IO
 import Data.Set (Set)
 import qualified Data.Set as Set
+
+import Data.Map (Map)
+import qualified Data.Map as Map
 
 isNumber :: Char -> Bool
 isNumber c = c `elem` "0123456789"
@@ -61,11 +64,19 @@ mkGamesFromLns :: [String] -> [Game]
 mkGamesFromLns lns = map (mkGame . splitParts . mkFlatTup . mkNum_Parts . mkGame_Nums) lns
 
 gameToPoints :: Game -> Int
-gameToPoints gm = case countPoints (gameDraws gm) winsSet of
-    0 -> 0
-    x -> 2^(x-1)
+gameToPoints gm = countWins (gameDraws gm) winsSet
     where winsSet = Set.fromList $ gameWins gm
-          countPoints draws set = foldl (\ acm draw -> if Set.member draw set then (acm+1) else acm) 0 draws
+          countWins draws set = foldl (\ acm draw -> if Set.member draw set then (acm+1) else acm) 0 draws
+
+mkCopies :: Map Int Int -> (Int, Int) -> Map Int Int
+mkCopies mp (i, points) = foldl addCopies mp [begin..end]
+    where currCopies = case Map.lookup i mp of
+                            Nothing -> 0
+                            Just a  -> a
+          addCopies mp idx = Map.insertWith (+) idx currCopies mp
+          begin = i+1
+          end = i+points
+
 
 main :: IO ()
 main =
@@ -76,12 +87,16 @@ main =
         let lns     = lines inputText
             games   = mkGamesFromLns lns
             points  = map gameToPoints games
-            total   = sum points
+            n       = length points
             (gms, wins, draws) = unzip3 $ map gameToTuple $ mkGamesFromLns lns
+            init    = Map.fromAscList $ zip gms $ replicate n 1
+            copies  = foldl mkCopies init $ zip gms points
+            total   = sum $ Map.elems copies
             --(wins, draws) = (join (***)) (map words) (winsStr, drawsStr)
-        putStrLn $ foldl (\ acm part -> ("\n" ++ show part ++ acm)) "" (reverse games)
+        --putStrLn $ foldl (\ acm part -> ("\n" ++ show part ++ acm)) "" (reverse games)
         print points
-        print total
-        putStrLn . show $ gms
+        print init
+        print copies
+        print $ total
         --print draws
 

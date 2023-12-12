@@ -1,4 +1,4 @@
-import Brute
+import Maps
 
 
 --main :: IO [Integer]
