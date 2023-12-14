@@ -72,15 +72,19 @@ mkDictsFromLns lns mps = case lns of
     where (rem, mp) = putRangesFromLns lns Map.empty
 
 
-findDest :: Int -> [((Int, Int), (Int, Int))] -> Int
-findDest x rgs = case pivot of
+findDest :: Int -> Map (Int, Int) (Int, Int) -> Int
+findDest x mp = case pivot of
         []  -> x
         ((src, dst):_)  | x >= xBgn -> yBgn + offset
                         | x < xBgn  -> x
             where (xBgn, xEnd) = src
                   (yBgn, yEnd) = dst
                   offset = x-xBgn
-    where pivot = dropWhile (\ rg -> x >= (snd . fst $ rg)) rgs
+    where rgs = Map.toAscList mp
+          pivot = dropWhile (\ rg -> x >= (snd . fst $ rg)) rgs
+
+pipeSrcToDest :: Int -> [Map (Int, Int) (Int, Int)] -> Int
+pipeSrcToDest x mps = foldl findDest x mps
 
 
 main :: IO ()
@@ -93,8 +97,9 @@ main = let
         seeds   = mkIntsFromLn seedStr
         mps     = mkDictsFromLns mapLns []
         (one:_) = mps
-    --putStrLn $ foldl (\ acm m -> concat [acm, (show $ Map.toAscList m), "\n\n"]) "" mps
-    print $ findDest 4294967296 $ Map.toAscList one
+    --putStrLn $ foldl (\ acm m -> concat [acm, (show $ Map.toAscList m), "\n\n"]) "" mps -- print each map as sorted list of items
+    --print $ findDest 1 one
+    print $ minimum $ map (flip pipeSrcToDest mps) seeds
 
 
 
