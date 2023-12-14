@@ -7,6 +7,8 @@ import qualified Data.Set as Set
 import Data.Map (Map)
 import qualified Data.Map as Map
 
+import qualified Data.List as List
+
 isNumber :: Char -> Bool
 isNumber c = c `elem` "0123456789"
 
@@ -26,8 +28,6 @@ indexOf y xs idx = case xs of
         True  -> idx
         False -> indexOf y xss (idx+1)
 
-
-
 -- Staged input parsing
 -- dunno if can do in one shot?
 -- don't want to hard code line number grabbing: cmon bruh
@@ -42,6 +42,16 @@ indexOf y xs idx = case xs of
 mkTupFromInts :: [Int] -> (Int, Int, Int)
 mkTupFromInts (x1:x2:x3:_) = (x1,x2,x3) 
 
+
+mkIntsFromLn :: String -> [Int]
+mkIntsFromLn ln = case isNumber c of
+    False -> map read ws :: [Int]
+    True  -> map read splits :: [Int]
+    where splits = words ln
+          (w:ws) = splits
+          (c:_) = w
+          
+
 putRangesFromLns :: [String] -> Map (Int, Int) (Int, Int) -> ([String], Map (Int, Int) (Int, Int))
 putRangesFromLns lns mp 
     | null lns  = ([], mp)      -- done: no more lines
@@ -54,8 +64,24 @@ putRangesFromLns lns mp
     where (ln:lnss) = lns
           (c:cs) = ln
 
-mkIntsFromLn :: String -> [Int]
-mkIntsFromLn ln = map read $ words ln :: [Int]
+
+mkDictsFromLns :: [String] -> [Map (Int, Int) (Int, Int)] -> [Map (Int, Int) (Int, Int)]
+mkDictsFromLns lns mps = case lns of
+    [] -> reverse mps
+    _  -> mkDictsFromLns rem (mp:mps)
+    where (rem, mp) = putRangesFromLns lns Map.empty
+
+
+findDest :: Int -> [((Int, Int), (Int, Int))] -> Int
+findDest x rgs = case pivot of
+        []  -> x
+        ((src, dst):_)  | x >= xBgn -> yBgn + offset
+                        | x < xBgn  -> x
+            where (xBgn, xEnd) = src
+                  (yBgn, yEnd) = dst
+                  offset = x-xBgn
+    where pivot = dropWhile (\ rg -> x >= (snd . fst $ rg)) rgs
+
 
 main :: IO ()
 main = let
@@ -64,6 +90,12 @@ main = let
     inputText   <- readFile inputPath
     let lns     = lines inputText
         (seedStr:_:mapLns) = lns
-        (_:seeds)   = mkIntsFromLn seedStr
+        seeds   = mkIntsFromLn seedStr
+        mps     = mkDictsFromLns mapLns []
+        (one:_) = mps
+    --putStrLn $ foldl (\ acm m -> concat [acm, (show $ Map.toAscList m), "\n\n"]) "" mps
+    print $ findDest 4294967296 $ Map.toAscList one
 
-    print seedStr
+
+
+
