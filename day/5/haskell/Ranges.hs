@@ -1,3 +1,5 @@
+module Ranges where
+
 import System.IO
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -52,20 +54,8 @@ putRangesFromLns lns mp
     where (ln:lnss) = lns
           (c:cs) = ln
 
-mkDictsFromLns :: [String] -> [Map (Int, Int) (Int, Int)] -> [Map (Int, Int) (Int, Int)]
-mkDictsFromLns lns mps = case lns of
-    [] -> mps
-    _  -> mkDictsFromLns rem (mp:mps)
-    where (rem, mp) = putRangesFromLns lns Map.empty
-
 mkIntsFromLn :: String -> [Int]
-mkIntsFromLn ln = case isNumber c of
-    False -> map read ws :: [Int]
-    True  -> map read splits :: [Int]
-    where splits = words ln
-          (w:ws) = splits
-          (c:_) = w
-          
+mkIntsFromLn ln = map read $ words ln :: [Int]
 
 main :: IO ()
 main = let
@@ -74,8 +64,6 @@ main = let
     inputText   <- readFile inputPath
     let lns     = lines inputText
         (seedStr:_:mapLns) = lns
-        seeds   = mkIntsFromLn seedStr
-        mps     = mkDictsFromLns mapLns []
-    print seeds
-    print mps
+        (_:seeds)   = mkIntsFromLn seedStr
 
+    print seedStr
